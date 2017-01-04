@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# OVM Manager script to replicate an issue
+# Oracle OVM Manager script to replicate an issue
+# This script is going to monitor with tail the OVM Manager logs and insert start and stop statement between tests
+# Finally there is an option for collecting and compress the new logs generated
 
 desire=$1
 test_name=$2
