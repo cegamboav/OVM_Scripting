@@ -17,7 +17,6 @@ while [ "$continue" = "wait" ];do
     read continue
 	if [ "$continue" = "yes" ]||[ "$continue" = "y" ]||[ "$continue" = "YES" ]||[ "$continue" = "Y" ];then
 	    for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "stop_$test_name" >> $log;done
-		egrep "stop_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
 		clear
     elif [ "$continue" = "no" ]||[ "$continue" = "n" ]||[ "$continue" = "NO" ]||[ "$continue" = "N" ] ;then
 	     clear
@@ -39,7 +38,6 @@ while [ "$continue" = "wait" ];do
     read continue
 	if [ "$continue" = "yes" ]||[ "$continue" = "y" ]||[ "$continue" = "YES" ]||[ "$continue" = "Y" ];then
 	    for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "start_$test_name" >> $log;done
-		egrep "start_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
 		clear
 		stop_monitoring		
     elif [ "$continue" = "no" ]||[ "$continue" = "n" ]||[ "$continue" = "NO" ]||[ "$continue" = "N" ] ;then
@@ -95,6 +93,8 @@ esac
 
 
 
+# egrep "stop_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
+# egrep "start_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
 
 
  
