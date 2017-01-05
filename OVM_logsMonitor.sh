@@ -111,7 +111,7 @@ c|C)
 		cd /tmp/
 		tar zcf logs_OVS_Server.`uname -n`.tar.gz  ./logs_OVS_Server.`uname -n`/
 		rm -fr /tmp/logs_OVS_Server.`uname -n`
-		echo "Done, please attach the logs_OVS_Server.`uname -n`.tar.gz file to the SR"
+		echo "Done, please attach the /tmp/logs_OVS_Server.`uname -n`.tar.gz file to the SR"
 	else
 		echo "/tmp/logs_OV* does not exist, there is no logs to collect"
 	fi
