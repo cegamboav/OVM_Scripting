@@ -85,10 +85,10 @@ m|M)
 		tail -f /var/log/messages >> /tmp/logs_OVM_Manager.`uname -n`/messages.log &
 	elif [ "$type" = "ovs" ];then 
 		[ -d /tmp/logs_OVS_Server.`uname -n`/ ]||mkdir /tmp/logs_OVS_Server.`uname -n`/
-        tail -f /var/log/xen/xend.log >> /tmp/logs_OVS_Server.`uname -n`/xend.log &
-        tail -f /var/log/xen/xend-debug.log >> /tmp/logs_OVS_Server.`uname -n`/xend-debug.log &
-        tail -f /var/log/ovs-agent.log >> /tmp/logs_OVS_Server.`uname -n`/ovs-agent.log &
-        tail -f /var/log/messages >> /tmp/logs_OVS_Server.`uname -n`/messages.log &
+		tail -f /var/log/xen/xend.log >> /tmp/logs_OVS_Server.`uname -n`/xend.log &
+		tail -f /var/log/xen/xend-debug.log >> /tmp/logs_OVS_Server.`uname -n`/xend-debug.log &
+		tail -f /var/log/ovs-agent.log >> /tmp/logs_OVS_Server.`uname -n`/ovs-agent.log &
+		tail -f /var/log/messages >> /tmp/logs_OVS_Server.`uname -n`/messages.log &
 	else 
 	     echo "OVM Type was not properly specified"
 		 case_null
