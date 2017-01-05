@@ -8,9 +8,9 @@
 desire=$1
 type=$2
 test_name=$3
-// PID of this Script
+# PID of this Script
 mypid=$$
-// Generate a random number, to differentiate tests with the same name at similar time
+# Generate a random number, to differentiate tests with the same name at similar time
 randA=`awk -v min=10 -v max=99 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
 
 case_null(){
@@ -95,7 +95,7 @@ m|M)
 	fi
 	echo "-----------------------------------------------------------------------"
 	echo "-------------------------------------"
-	// call start_monitoring funtion for monitoring the test
+	# call start_monitoring funtion for monitoring the test
 	start_monitoring	
 	;;
 c|C)
@@ -122,9 +122,9 @@ c|C)
 esac
 
 
-// Just to manually check the OVM_Manager logs
+# Just to manually check the OVM_Manager logs
 # egrep "stop_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
 # egrep "start_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
-// Just to manually check the OVM_Manager logs
+# Just to manually check the OVM_Manager logs
 # egrep "stop_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
 # egrep "start_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
