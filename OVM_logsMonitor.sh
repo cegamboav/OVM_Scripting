@@ -88,7 +88,7 @@ m|M)
 		tail -f /var/log/xen/xend.log >> /tmp/logs_OVS_Server.`uname -n`/xend.log &
 		tail -f /var/log/xen/xend-debug.log >> /tmp/logs_OVS_Server.`uname -n`/xend-debug.log &
 		tail -f /var/log/ovs-agent.log >> /tmp/logs_OVS_Server.`uname -n`/ovs-agent.log &
-		tail -f /var/log/messages >> /tmp/logs_OVS_Server.`uname -n`/messages.log &
+		[ -f /var/log/ovs-agent/ovs_root.log ]tail -f /var/log/ovs-agent/ovs_root.log >> /tmp/logs_OVS_Server.`uname -n`/ovs_root.log &
 	else 
 	     echo "OVM Type was not properly specified"
 		 case_null
