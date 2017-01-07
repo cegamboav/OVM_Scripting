@@ -129,3 +129,34 @@ esac
 # Just to manually check the OVM_Manager logs
 # egrep "stop_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
 # egrep "start_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
+
+# + Example of its use:
+# [root@server3 ~]# mkdir /tmp/delete_me
+# [root@server3 ~]# cd /tmp/delete_me
+# [root@server3 delete_me]# vi OVM_logsMonitor.sh
+# [root@server3 delete_me]# chmod +x OVM_logsMonitor.sh
+# [root@server3 delete_me]# ./OVM_logsMonitor.sh
+# Please run again the script using a valid option
+
+# ./OVMManager_log.sh <desire> <OVM Type> <test_name>
+# desire:
+       # m : For Monitoring
+       # c : For Collecting data
+# OVM Type:
+       # ovmm : If you want to Monitor the OVM Manager
+# ovs  : If you want to Monitor the OVS Server - Dom0
+
+# [root@server3 delete_me]# ./OVM_logsMonitor.sh m  ovs test1
+# -----------------------------------------------------------------------
+# -------------------------------------
+# Start monitoring test1 now ? yes/no
+# yes
+# <Here your replicate the issue>
+# Stop monitoring test1 now ? yes/no
+# yes
+# Terminanting monitoring processes
+# ./OVM_logsMonitor.sh: line 52:  4174 Terminated              tail -f /var/log/xen/xend.log >> /tmp/logs_OVS_Server.`uname -n`/xend.log
+# [root@server3 delete_me]# ./OVM_logsMonitor.sh c
+# Collecting the content of /tmp/logs_OVS_Server.server3.cr.oracle.com/ ...
+# Done, please attach the /tmp/logs_OVS_Server.server3.cr.oracle.com.tar.gz file to the SR
+
