@@ -27,15 +27,15 @@ case_null(){
 	echo ""
 	exit 1
 }
-stop_monitoring(){
+Xstop_monitoring(){
 continue="wait"
 
 while [ "$continue" = "wait" ];do
-    echo "Stop monitoring $test_name now ? yes/no"
+    echo "Stop monitoring now ? yes/no"
     read continue
 	if [ "$continue" = "yes" ]||[ "$continue" = "y" ]||[ "$continue" = "YES" ]||[ "$continue" = "Y" ];then
-	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "stop_$test_name.$randA" >> $log;done
-		[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "stop_$test_name.$randA" >> $log;done
+	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
+		[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
 		clear
     elif [ "$continue" = "no" ]||[ "$continue" = "n" ]||[ "$continue" = "NO" ]||[ "$continue" = "N" ] ;then
 	     clear
@@ -49,17 +49,17 @@ while [ "$continue" = "wait" ];do
 done
 }
 
-start_monitoring(){
+Xstart_monitoring(){
 continue="wait"
 
 while [ "$continue" = "wait" ];do
-    echo "Start monitoring $test_name now ? yes/no"
+    echo "Start monitoring now ? yes/no"
     read continue
 	if [ "$continue" = "yes" ]||[ "$continue" = "y" ]||[ "$continue" = "YES" ]||[ "$continue" = "Y" ];then
-	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "start_$test_name.$randA" >> $log;done
-		[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "start_$test_name.$randA" >> $log;done
+	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "Xstart_$test_name.$randA" >> $log;done
+		[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstart_$test_name.$randA" >> $log;done
 		clear
-		stop_monitoring		
+		Xstop_monitoring		
     elif [ "$continue" = "no" ]||[ "$continue" = "n" ]||[ "$continue" = "NO" ]||[ "$continue" = "N" ] ;then
 	     echo "Exit because no monitoring is needed, if there was no data collected in /tmp/logs_OV* you might consider to remove the folder"
 	else
@@ -97,8 +97,8 @@ m|M)
 	fi
 	echo "-----------------------------------------------------------------------"
 	echo "-------------------------------------"
-	# call start_monitoring funtion for monitoring the test
-	start_monitoring	
+	# call Xstart_monitoring funtion for monitoring the test
+	Xstart_monitoring	
 	;;
 c|C)
     clear
@@ -118,18 +118,41 @@ c|C)
 		echo "/tmp/logs_OV* does not exist, there is no logs to collect"
 	fi
 	;;
-*)
+o|O)
+    clear
+	cd $2
+	if [ -f logs_OVM_Manager.tar.gz ];then
+		echo "Decompressing logs_OVM_Manager.tar.gz ..."
+		tar xf logs_OVM_Manager.tar.gz
+		cd logs_OVM_Manager*
+        test_start=`egrep "Xstart_" *|cut -d":" -f2|uniq`
+		test_stop=`egrep "Xstop_" *|cut -d":" -f2|uniq`
+	    mkdir ./.old_logs/
+		for file in `ls -1`;do 
+			awk -vtest_start=$test_start -vtest_stop=$test_stop '$0==test_start { flag=1 } flag;$0==test_stop  { flag=0 }' ./$file >> ./$file.txt
+			mv ./$file  ./.old_logs/
+		done
+		echo "Done, files are decompressed"
+		pwd
+		ls -1 *
+ # elif [ -d /tmp/logs_OVS_Server.`uname -n`/ ];then 
+ # nothing
+    else
+	  echo nothing
+	fi
+	;;
+	*)
     case_null
 	;;
 esac
 
 
 # Just to manually check the OVM_Manager logs
-# egrep "stop_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
-# egrep "start_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
+# egrep "Xstop_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
+# egrep "Xstart_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
 # Just to manually check the OVM_Manager logs
-# egrep "stop_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
-# egrep "start_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
+# egrep "Xstop_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
+# egrep "Xstart_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
 
 # + Example of its use:
 # [root@server3 ~]# mkdir /tmp/delete_me
@@ -160,4 +183,3 @@ esac
 # [root@server3 delete_me]# ./OVM_logsMonitor.sh c
 # Collecting the content of /tmp/logs_OVS_Server.server3.cr.oracle.com/ ...
 # Done, please attach the /tmp/logs_OVS_Server.server3.cr.oracle.com.tar.gz file to the SR
-
