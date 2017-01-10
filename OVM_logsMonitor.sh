@@ -6,27 +6,41 @@
 # Made by @DJCerdas
 
 desire=$1
-type=$2
-test_name=$3
+test_name=$2
+trigger=$3
 # PID of this Script
 mypid=$$
-# Generate a random number, to differentiate tests with the same name at similar time
+# Generates a random number, to differentiate tests with the same name at similar time
 randA=`awk -v min=10 -v max=99 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
+
+# Find the OVM type
+if [ -f /etc/ovs-release ];then
+	type="ovs"
+elif [ -f `find /u01 -name .config` ];then 
+	type="ovmm"
+else
+    echo "This is not an OVM Manager or OVS Server"
+fi
 
 case_null(){
     clear
-	echo "Please run again the script using a valid option" 
-	echo ""
-    echo -e " ./OVMManager_log.sh <desire> <OVM Type> <test_name> \n\n"
-	echo "desire:"
-    echo "       m : For Monitoring"
-    echo "       c : For Collecting data" 
-	echo "OVM Type:"
-    echo "       ovmm : If you want to Monitor the OVM Manager"
-    echo "       ovs  : If you want to Monitor the OVS Server - Dom0" 
+	echo -e "\n Please run again the script using a valid option\n\n" 
+    echo -e " .OVM_logsMonitor.sh <desire> <options/parameters> \n\n"
+	echo -e "desire:"	
+    echo "  m : For Monitoring"
+    echo -e "\t./OVM_logsMonitor.sh m <test_name>  \n"
+    echo "  c : For Collecting data"             
+    echo -e "\t./OVM_logsMonitor.sh c \n"
+    echo "  r : Run a manual test" 	
+	echo "      OVM_logsMonitor.sh must be monitoring first" 	
+	echo "      Use the same name for the test for start and stop" 		
+    echo -e "\t./OVM_logsMonitor.sh r <test_name> <start/stop> \n"
+    echo "  o : Extract logs to output files" 
+    echo -e "\t./OVM_logsMonitor.sh o <path> \n"	     
 	echo ""
 	exit 1
 }
+
 Xstop_monitoring(){
 continue="wait"
 
@@ -71,8 +85,28 @@ while [ "$continue" = "wait" ];do
 done
 	
 	echo "Terminanting monitoring processes"
-    pkill -TERM -P $mypid 2>/dev/null
+    pkill -TERM -P $mypid &>/dev/null
+	clear
+	exit 0
 }
+## This function if for organize the extracted logs
+organizer(){
+pwd
+mkdir ./done
+for file in `ls -1|egrep -v done`;do 
+	for test_start in `egrep "Xstart_" ./$file|cut -d":" -f2|uniq`;do
+		name_file=`echo $test_start|sed 's/Xstart_//g'`
+		test_stop=`tac ./$file|egrep "Xstop_.*$name_file"|cut -d":" -f2|uniq`
+		## If there isn't end file will not be generated
+		[ -z "$test_stop" ]||awk -vtest_start=$test_start -vtest_stop=$test_stop '$0==test_start { flag=1 } flag;$0==test_stop  { flag=0 }' ./$file >> `pwd`/done/$file.$name_file
+	done
+done
+mkdir ./.old_logs/
+mv ./*.log  ./.old_logs/
+}
+
+## confirm test_name is not empty
+[ -z $test_name ]&&case_null
 
 case $desire in
 m|M)
@@ -118,6 +152,17 @@ c|C)
 		echo "/tmp/logs_OV* does not exist, there is no logs to collect"
 	fi
 	;;
+r|R)
+	if [ "$trigger" = "start" ];then
+	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "Xstart_$test_name" >> $log;done
+		[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstart_$test_name" >> $log;done
+	elif [ "$trigger" = "stop" ];then 
+	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "Xstop_$test_name" >> $log;done
+		[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstop_$test_name" >> $log;done
+	else
+	    case_null
+    fi
+	;;
 o|O)
     clear
 	cd $2
@@ -125,24 +170,39 @@ o|O)
 		echo "Decompressing logs_OVM_Manager.tar.gz ..."
 		tar xf logs_OVM_Manager.tar.gz
 		cd logs_OVM_Manager*
-        test_start=`egrep "Xstart_" *|cut -d":" -f2|uniq`
-		test_stop=`egrep "Xstop_" *|cut -d":" -f2|uniq`
-	    mkdir ./.old_logs/
-		for file in `ls -1`;do 
-			awk -vtest_start=$test_start -vtest_stop=$test_stop '$0==test_start { flag=1 } flag;$0==test_stop  { flag=0 }' ./$file >> ./$file.txt
-			mv ./$file  ./.old_logs/
+		organizer
+		export PATH=$PATH:/usr/local/bin:/share/linuxtools/bin
+		mkdir `pwd`/done/tmp
+		cd `pwd`/done/
+		## to filtered AdminServer.log
+		for adminlog in $(ls -1 *|egrep AdminServer.log);do
+			mv ./$adminlog ./tmp/
+			cd ./tmp
+			OvmLogTool.py -o $adminlog.filtered
+            mv ./$adminlog.filtered ../../$adminlog.filtered
+            cd 	../
 		done
+		rm -fr ./tmp
+		cd ..&&mv ./done/* .
+		rm ./done -fr
+
 		echo "Done, files are decompressed"
 		pwd
-		ls -1 *
- # elif [ -d /tmp/logs_OVS_Server.`uname -n`/ ];then 
- # nothing
-    else
-	  echo nothing
+	elif [ -f logs_OVS_Server.* ];then 
+		echo "Decompressing /tmp/logs_OVS_Server.* ..."
+		tar xf logs_OVS_Server.*
+		cd logs_OVS_Server.*
+		organizer
+		mv ./done/* .
+		rm ./done -fr
+		echo "Done, files are decompressed"
+        pwd		
+	else
+	    case_null
 	fi
 	;;
-	*)
-    case_null
+*)
+      case_null
 	;;
 esac
 
@@ -162,7 +222,7 @@ esac
 # [root@server3 delete_me]# ./OVM_logsMonitor.sh
 # Please run again the script using a valid option
 
-# ./OVMManager_log.sh <desire> <OVM Type> <test_name>
+# .OVM_logsMonitor.sh <desire> <OVM Type> <test_name>
 # desire:
        # m : For Monitoring
        # c : For Collecting data
