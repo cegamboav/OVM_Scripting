@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Oracle OVM Manager/OVS script to replicate an issue
@@ -16,7 +17,7 @@ randA=`awk -v min=10 -v max=99 'BEGIN{srand(); print int(min+rand()*(max-min+1))
 # Find the OVM type
 if [ -f /etc/ovs-release ];then
 	type="ovs"
-elif [ -f `find /u01 -name .config` ];then 
+elif [ -f `find /u01 -name .config 2>/dev/null` ];then 
 	type="ovmm"
 else
     echo "This is not an OVM Manager or OVS Server"
@@ -106,7 +107,7 @@ mv ./*.log  ./.old_logs/
 }
 
 ## confirm test_name is not empty
-[ -z $test_name ]&&case_null
+# [ -z $test_name ]&&case_null
 
 case $desire in
 m|M)
