@@ -36,7 +36,7 @@ case_null(){
 	echo "      Use the same name for the test for start and stop" 		
     echo -e "\t./OVM_logsMonitor.sh r <test_name> <start/stop> \n"
     echo "  o : Extract logs to output files" 
-    echo -e "\t./OVM_logsMonitor.sh o <path> \n"	     
+    echo -e "\t./OVM_logsMonitor.sh o <path where is the .tar.gz> \n"	     
 	echo ""
 	exit 1
 }
@@ -174,7 +174,7 @@ o|O)
 		export PATH=$PATH:/usr/local/bin:/share/linuxtools/bin
 		mkdir `pwd`/done/tmp
 		cd `pwd`/done/
-		## to filtered AdminServer.log
+		## To filter AdminServer.log
 		for adminlog in $(ls -1 *|egrep AdminServer.log);do
 			mv ./$adminlog ./tmp/
 			cd ./tmp
