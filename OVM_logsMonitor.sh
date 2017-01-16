@@ -50,9 +50,9 @@ while [ "$continue" = "wait" ];do
     read continue
 	if [ "$continue" = "yes" ]||[ "$continue" = "y" ]||[ "$continue" = "YES" ]||[ "$continue" = "Y" ];then
 	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
-	    [ "$type" = "ovmm" ]&&[ -f `ls -1tr /var/log/ovmm/*|tail -1` ]&&cp -p `ls -1tr /var/log/ovmm/*|tail -1`/tmp/logs_OVS_Server.`uname -n`/
 	    [ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
-		clear
+	    [ "$type" = "ovmm" ]&&[ -f `ls -1tr /var/log/ovmm/*|tail -1` ]&&cp -p `ls -1tr /var/log/ovmm/*|tail -1` /tmp/logs_OVM_Manager.`uname -n`/
+   clear
     elif [ "$continue" = "no" ]||[ "$continue" = "n" ]||[ "$continue" = "NO" ]||[ "$continue" = "N" ] ;then
 	     clear
 	     echo "Ok, then wait until you hit yes to stop monitoring"
