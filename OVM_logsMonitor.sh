@@ -50,7 +50,8 @@ while [ "$continue" = "wait" ];do
     read continue
 	if [ "$continue" = "yes" ]||[ "$continue" = "y" ]||[ "$continue" = "YES" ]||[ "$continue" = "Y" ];then
 	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
-		[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
+	    [ "$type" = "ovmm" ]&&[ -f `ls -1tr /var/log/ovmm/*|tail -1` ]&&cp -p `ls -1tr /var/log/ovmm/*|tail -1`/tmp/logs_OVS_Server.`uname -n`/
+	    [ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
 		clear
     elif [ "$continue" = "no" ]||[ "$continue" = "n" ]||[ "$continue" = "NO" ]||[ "$continue" = "N" ] ;then
 	     clear
@@ -74,7 +75,7 @@ while [ "$continue" = "wait" ];do
 	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "Xstart_$test_name.$randA" >> $log;done
 		[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstart_$test_name.$randA" >> $log;done
 		clear
-		Xstop_monitoring		
+		Xstop_monitoring
     elif [ "$continue" = "no" ]||[ "$continue" = "n" ]||[ "$continue" = "NO" ]||[ "$continue" = "N" ] ;then
 	     echo "Exit because no monitoring is needed, if there was no data collected in /tmp/logs_OV* you might consider to remove the folder"
 	else
