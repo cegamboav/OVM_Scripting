@@ -91,24 +91,23 @@ done
 	clear
 	exit 0
 }
+
 ## This function if for organize the extracted logs
 organizer(){
-pwd
 mkdir ./done
-for file in `ls -1|egrep -v done`;do 
-	for test_start in `egrep "Xstart_" ./$file|cut -d":" -f2|uniq`;do
-		name_file=`echo $test_start|sed 's/Xstart_//g'`
-		test_stop=`tac ./$file|egrep "Xstop_.*$name_file"|cut -d":" -f2|uniq`
-		## If there isn't end file will not be generated
-		[ -z "$test_stop" ]||awk -vtest_start=$test_start -vtest_stop=$test_stop '$0==test_start { flag=1 } flag;$0==test_stop  { flag=0 }' ./$file >> `pwd`/done/$file.$name_file
+if [ `ls -1|egrep -v done|wc -l` -gt 0 ];then
+	for file in `ls -1|egrep -v "done|this.sh"`;do 
+		for test_start in `egrep "Xstart_" ./$file|cut -d":" -f2|uniq`;do
+			name_file=`echo $test_start|sed 's/Xstart_//g'`
+			test_stop=`tac ./$file|egrep "Xstop_.*$name_file"|cut -d":" -f2|uniq`
+			## If there isn't end file will not be generated
+			[ -z "$test_stop" ]||awk -vtest_start=$test_start -vtest_stop=$test_stop '$0==test_start { flag=1 } flag;$0==test_stop  { flag=0 }' ./$file >> `pwd`/done/$file.$name_file
+		done
 	done
-done
-mkdir ./.old_logs/
-mv ./*.log  ./.old_logs/
+	mkdir ./.old_logs/
+	mv ./*.log  ./.old_logs/
+	fi
 }
-
-## confirm test_name is not empty
-# [ -z $test_name ]&&case_null
 
 case $desire in
 m|M)
@@ -167,41 +166,11 @@ r|R)
 	;;
 o|O)
     clear
+	# cd to the directory that has the uncompressed OVM logs 
 	cd $2
-	if [ -f logs_OVM_Manager.tar.gz ];then
-		echo "Decompressing logs_OVM_Manager.tar.gz ..."
-		tar xf logs_OVM_Manager.tar.gz
-		cd logs_OVM_Manager*
-		organizer
-		export PATH=$PATH:/usr/local/bin:/share/linuxtools/bin
-		mkdir `pwd`/done/tmp
-		cd `pwd`/done/
-		## To filter AdminServer.log
-		for adminlog in $(ls -1 *|egrep AdminServer.log);do
-			mv ./$adminlog ./tmp/
-			cd ./tmp
-			OvmLogTool.py -o $adminlog.filtered
-            mv ./$adminlog.filtered ../../$adminlog.filtered
-            cd 	../
-		done
-		rm -fr ./tmp
-		cd ..&&mv ./done/* .
-		rm ./done -fr
-
-		echo "Done, files are decompressed"
-		pwd
-	elif [ -f logs_OVS_Server.* ];then 
-		echo "Decompressing /tmp/logs_OVS_Server.* ..."
-		tar xf logs_OVS_Server.*
-		cd logs_OVS_Server.*
-		organizer
-		mv ./done/* .
-		rm ./done -fr
-		echo "Done, files are decompressed"
-        pwd		
-	else
-	    case_null
-	fi
+	# Organize the logs
+	organizer
+	[ `ls -1 *|egrep AdminServer.log|wc -l` -gt 0 ]&&AdminServer_py
 	;;
 *)
       case_null
