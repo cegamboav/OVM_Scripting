@@ -4,7 +4,7 @@
 # Oracle OVM Manager/OVS script to replicate an issue
 # This script is going to monitor with tail command the OVM Manager/OVS logs and insert start and stop statement between tests
 # Finally there is an option for collecting and compress the new logs generated
-# Made by @DJCerdas
+
 
 desire=$1
 test_name=$2
