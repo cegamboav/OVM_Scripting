@@ -51,6 +51,8 @@ while [ "$continue" = "wait" ];do
 	if [ "$continue" = "yes" ]||[ "$continue" = "y" ]||[ "$continue" = "YES" ]||[ "$continue" = "Y" ];then
 	    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logs_OVS_Server.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
 	    [ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logs_OVM_Manager.`uname -n`/*);do echo "Xstop_$test_name.$randA" >> $log;done
+	    # installation logs
+	    [ "$type" = "ovs" ]&&[ -f `ls -1tr /root/install.log*|tail -1` ]&&cp -p `ls -1tr /root/install.log*|tail -1` /tmp/logs_OVS_Server.`uname -n`/
 	    [ "$type" = "ovmm" ]&&[ -f `ls -1tr /var/log/ovmm/*|tail -1` ]&&cp -p `ls -1tr /var/log/ovmm/*|tail -1` /tmp/logs_OVM_Manager.`uname -n`/
    clear
     elif [ "$continue" = "no" ]||[ "$continue" = "n" ]||[ "$continue" = "NO" ]||[ "$continue" = "N" ] ;then
