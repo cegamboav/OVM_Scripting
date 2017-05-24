@@ -122,11 +122,15 @@ m|M)
 		tail -f /var/log/messages >> /tmp/logs_OVM_Manager.`uname -n`/messages.log &
 	elif [ "$type" = "ovs" ];then 
 		[ -d /tmp/logs_OVS_Server.`uname -n`/ ]||mkdir /tmp/logs_OVS_Server.`uname -n`/
+		[ -f /root/upgrade.log ]||cp /root/upgrade.log /tmp/logs_OVS_Server.`uname -n`/upgrade.log
 		tail -f /var/log/xen/xend.log >> /tmp/logs_OVS_Server.`uname -n`/xend.log &
 		tail -f /var/log/xen/xend-debug.log >> /tmp/logs_OVS_Server.`uname -n`/xend-debug.log &
+		tail -f /var/log/osc.log >> /tmp/logs_OVS_Server.`uname -n`/osc.log &		
+		tail -f /var/log/ovm-consoled.log >> /tmp/logs_OVS_Server.`uname -n`/ovm-consoled.log &	
 		tail -f /var/log/ovs-agent.log >> /tmp/logs_OVS_Server.`uname -n`/ovs-agent.log &
+		tail -f /var/log/ovmwatch.log >> /tmp/logs_OVS_Server.`uname -n`/ovmwatch.log &
 		tail -f /var/log/messages >> /tmp/logs_OVS_Server.`uname -n`/messages.log &
-		tail -f /var/log/dmesg >> /tmp/logs_OVS_Server.`uname -n`/dmesg.log &
+		tail -f /var/log/dmesg >> /tmp/logs_OVS_Server.`uname -n`/dmesg.log &		 
 		[ -f /var/log/ovs-agent/ovs_root.log ]&&tail -f /var/log/ovs-agent/ovs_root.log >> /tmp/logs_OVS_Server.`uname -n`/ovs_root.log &
 	else 
 	     echo "OVM Type was not properly specified"
