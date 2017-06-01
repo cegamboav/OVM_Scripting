@@ -1,16 +1,19 @@
-
 #!/bin/bash
 
-# Oracle OVM Manager/OVS script to replicate an issue
-# This script is going to monitor with tail command the OVM Manager/OVS logs and insert start and stop statement between tests
-# Finally there is an option for collecting and compress the new logs generated
-
+# Name        : OVM_logsMonitor.sh
+# Version     : 0.2
+# Copyright   : GPLv2
+# Description :  Oracle OVM Manager/OVS script to replicate an issue
+#                This script is going to monitor with tail command the OVM Manager/OVS 
+#                logs and insert start and stop statement between tests
+#                Finally there is an option for collecting and compress the new logs generated
 
 desire=$1
 test_name=$2
 trigger=$3
 # PID of this Script
 mypid=$$
+
 # Generates a random number, to differentiate tests with the same name at similar time
 randA=`awk -v min=10 -v max=99 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
 
@@ -22,7 +25,6 @@ elif [ -f `find /u01 -name .config 2>/dev/null` ];then
 else
     echo "This is not an OVM Manager or OVS Server"
 fi
-
 case_null(){
     clear
 	echo -e "\n Please run again the script using a valid option\n\n" 
@@ -41,10 +43,8 @@ case_null(){
 	echo ""
 	exit 1
 }
-
 Xstop_monitoring(){
 continue="wait"
-
 while [ "$continue" = "wait" ];do
     echo "Stop monitoring now ? yes/no"
     read continue
@@ -66,10 +66,8 @@ while [ "$continue" = "wait" ];do
 	
 done
 }
-
 Xstart_monitoring(){
 continue="wait"
-
 while [ "$continue" = "wait" ];do
     echo "Start monitoring now ? yes/no"
     read continue
@@ -94,11 +92,33 @@ done
 	exit 0
 }
 
+adminserver_py(){
+export PATH=$PATH:/usr/local/bin:/share/linuxtools/bin
+pwd
+[ -d `pwd`/done/tmpX/ ]||mkdir `pwd`/done/tmpX/
+cd `pwd`/done/
+## To filter AdminServer.log
+for adminlog in $(ls -1 *|egrep AdminServer.log);do
+	mv ./$adminlog ./tmpX/AdminServer.log
+	cd ./tmpX
+	OvmLogTool.py -o $adminlog.filtered
+	mv ./$adminlog.filtered ../../$adminlog.filtered
+	cd 	../
+done
+cd ..
+[ -f `pwd`/.old_logs/ovm-manager*install*.log ]&&mv `pwd`/.old_logs/ovm-manager*install*.log ./
+mv `pwd`/done/* ./
+rm -fr `pwd`/tmpX
+rm -fr `pwd`/done
+echo "Check for the OVM logs in"
+echo "# cd `pwd`"
+}
+
 ## This function if for organize the extracted logs
 organizer(){
 mkdir ./done
 if [ `ls -1|egrep -v done|wc -l` -gt 0 ];then
-	for file in `ls -1|egrep -v "done|this.sh"`;do 
+	for file in `ls -1|egrep -v "done"`;do 
 		for test_start in `egrep "Xstart_" ./$file|cut -d":" -f2|uniq`;do
 			name_file=`echo $test_start|sed 's/Xstart_//g'`
 			test_stop=`tac ./$file|egrep "Xstop_.*$name_file"|cut -d":" -f2|uniq`
@@ -109,6 +129,10 @@ if [ `ls -1|egrep -v done|wc -l` -gt 0 ];then
 	mkdir ./.old_logs/
 	mv ./*.log  ./.old_logs/
 	fi
+if [ `ls -1 ./done/*|egrep AdminServer.log|wc -l` -gt 0 ];then
+   adminserver_py
+fi
+clear
 }
 
 case $desire in
@@ -176,47 +200,46 @@ o|O)
 	cd $2
 	# Organize the logs
 	organizer
-	[ `ls -1 *|egrep AdminServer.log|wc -l` -gt 0 ]&&AdminServer_py
 	;;
 *)
       case_null
 	;;
 esac
 
-
 # Just to manually check the OVM_Manager logs
-# egrep "Xstop_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
-# egrep "Xstart_$test_name" /tmp/logs_OVM_Manager.`uname -n`/*
-# Just to manually check the OVM_Manager logs
-# egrep "Xstop_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
-# egrep "Xstart_$test_name" /tmp/logs_OVS_Server.`uname -n`/*
+# egrep "test_name" /tmp/logs_OVM_Manager.`uname -n`/*
+# egrep "test_name" /tmp/logs_OVS_Server.`uname -n`/*
 
-# + Example of its use:
-# [root@server3 ~]# mkdir /tmp/delete_me
-# [root@server3 ~]# cd /tmp/delete_me
-# [root@server3 delete_me]# vi OVM_logsMonitor.sh
-# [root@server3 delete_me]# chmod +x OVM_logsMonitor.sh
-# [root@server3 delete_me]# ./OVM_logsMonitor.sh
+# ++ Example of its use:
+
+#$ ./OVM_logsMonitor.sh
+#
 # Please run again the script using a valid option
+#
+#
+# .OVM_logsMonitor.sh <desire> <options/parameters>
+#
+#
+#desire:
+#  m : For Monitoring
+#        ./OVM_logsMonitor.sh m <test_name>
+#
+#  c : For Collecting data
+#        ./OVM_logsMonitor.sh c
+#
+#  r : Run a manual test
+#      OVM_logsMonitor.sh must be monitoring first
+#      Use the same name for the test for start and stop
+#        ./OVM_logsMonitor.sh r <test_name> <start/stop>
+#
+#  o : Extract logs to output files
+#        ./OVM_logsMonitor.sh o <path where is the .tar.gz>
 
-# .OVM_logsMonitor.sh <desire> <OVM Type> <test_name>
-# desire:
-       # m : For Monitoring
-       # c : For Collecting data
-# OVM Type:
-       # ovmm : If you want to Monitor the OVM Manager
-# ovs  : If you want to Monitor the OVS Server - Dom0
-
-# [root@server3 delete_me]# ./OVM_logsMonitor.sh m  ovs test1
-# -----------------------------------------------------------------------
-# -------------------------------------
-# Start monitoring test1 now ? yes/no
-# yes
-# <Here your replicate the issue>
-# Stop monitoring test1 now ? yes/no
-# yes
-# Terminanting monitoring processes
-# ./OVM_logsMonitor.sh: line 52:  4174 Terminated              tail -f /var/log/xen/xend.log >> /tmp/logs_OVS_Server.`uname -n`/xend.log
-# [root@server3 delete_me]# ./OVM_logsMonitor.sh c
-# Collecting the content of /tmp/logs_OVS_Server.server3.cr.oracle.com/ ...
-# Done, please attach the /tmp/logs_OVS_Server.server3.cr.oracle.com.tar.gz file to the SR
+## Start monitoring
+		# ls ./OVM_logsMonitor.sh
+		# tr -d '\015' < ./OVM_logsMonitor.sh > /tmp/OVM_logsMonitor.sh
+		# chmod +x /tmp/OVM_logsMonitor.sh
+		# /tmp/OVM_logsMonitor.sh m  Test0
+	##	/** please write "yes" and enter , next move to point 2.b **/
+	##	Start monitoring now ? yes/no
+	##	yes
