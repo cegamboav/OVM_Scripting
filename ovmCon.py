@@ -1,7 +1,7 @@
 #!/usr/bin/python
 ## ============================================================================
 ## Name        : con.py
-## Author      : david.cerdas@oracle.com
+## Author      : david.cerdas
 ## Version     : 0.1
 ## Copyright   : GPLv2
 ## Description : To Verify the connection from OVS Server to its OVM Manager, 
