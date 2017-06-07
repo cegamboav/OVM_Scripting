@@ -41,7 +41,7 @@ commands=(
     "uname -a"
 )
 }
-# Run alt_sosreport_omm
+# Run alt_sosreport
 function alt_sosreport(){
 for c in "${commands[@]}";do
 	echo "# "$c
