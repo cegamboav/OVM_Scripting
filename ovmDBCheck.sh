@@ -20,4 +20,5 @@ echo $adminLog
 	grep 'odof.exception.ObjectNotFoundException' -B 1 $adminLog|head -6
 	printf "\n\n"
 	printf "Last messages:"
-	egrep 'odof.exception.ObjectNotFoundException' -B 1 $adminLog|tail -6;printf "\n----------------------\n"
+	egrep 'odof.exception.ObjectNotFoundException' -B 1 $adminLog|tail -6
+	printf "\n----------------------\n"
