@@ -144,7 +144,7 @@ m|M)
 		[ -d /tmp/logs_OVM_Manager.`uname -n`/ ]||mkdir /tmp/logs_OVM_Manager.`uname -n`/
 		tail -f `find /u01 -name AdminServer.log` >> /tmp/logs_OVM_Manager.`uname -n`/AdminServer.log &
 		tail -f `find /u01 -name AdminServer-diagnostic.log` >> /tmp/logs_OVM_Manager.`uname -n`/AdminServer-diagnostic.log &
-		tail -f /var/log/httpd/access_log  >> /tmp/logs_OVM_Manager.`uname -n`/access_log.log &
+		[ -f /var/log/httpd/access_log ]&&tail -f /var/log/httpd/access_log  >> /tmp/logs_OVM_Manager.`uname -n`/access_log.log &
 		tail -f /var/log/messages >> /tmp/logs_OVM_Manager.`uname -n`/messages.log &
 	elif [ "$type" = "ovs" ];then 
 		[ -d /tmp/logs_OVS_Server.`uname -n`/ ]||mkdir /tmp/logs_OVS_Server.`uname -n`/
