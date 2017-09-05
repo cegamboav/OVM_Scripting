@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Name        	: ovmLogsMonitor.sh
-# Author      	: david.cerdas
+# Author      	: david.cerdas@oracle.com
 # Version     	: 1.0
 # Copyright   	: GPLv2
 # Description	: Oracle OVM Manager/OVS script to replicate an issue
@@ -49,10 +49,7 @@ continue=wait
 		read continue
 		if [ "$continue" = "yes" ]||[ "$continue" = "y" ]||[ "$continue" = "YES" ]||[ "$continue" = "Y" ];then
 			[ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logsOvsServer/*|egrep -v xFiles);do echo "Xstop_$monID" >> $log;done
-			[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logsOvmManager/*|egrep -v xFiles);do echo "Xstop_$monID" >> $log;done
-			# installation logs
-			[ "$type" = "ovs" ]&&[ `ls -1tr /root/install.log* 2>/dev/null|tail -1|wc -l` -gt 0  ]&&cp -p `ls -1tr /root/install.log*|tail -1` /tmp/logsOvsServer/xFiles/ 
-			[ "$type" = "ovmm" ]&&[ `ls -1tr /var/log/ovmm/* 2>/dev/null|tail -1|wc -l` -gt 0  ]&&cp -p `ls -1tr /var/log/ovmm/*|tail -1` /tmp/logsOvmManager/xFiles/  2>/dev/null
+			[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logsOvmManager/*|egrep -v xFiles);do echo "Xstop_$monID" >> $log;done			
 		else
 			 echo "$continue is not valid, please try with yes if you want to end the monitoring"  
 			 continue="wait"
@@ -60,13 +57,15 @@ continue=wait
 	done
  	clear
 	# collect all the logs
-	collectData	
+	collectData
 	# Terminante monitoring processes
     pkill -TERM -P $mypid 2>/dev/null
 	clear                                                                      
-	echo -e "\n`clear`\n--------------------------------------------------------------\n- Done, please attach the /tmp/logsOv*.tar.gz file to the SR - \n--------------------------------------------------------------\n`ls -1 /tmp/logsOv*`\n"
+	echo -e "\n`clear`\n--------------------------------------------------------------\n"
+	echo -e "- Done, please attach the /tmp/logsOv*.tar.gz file to the SR - "
+	echo -e "\n--------------------------------------------------------------\n`ls -1 /tmp/logsOv*`\n"
 	echo " "
-	exit 0
+	exit 0	
 }
 
 # Initialize the script
@@ -75,16 +74,18 @@ XstartMonitoring(){
 	mypid=$$
 	# initialize test counter 
 	[ -e /tmp/testCounter.ovmLockM ]||echo "0" > /tmp/testCounter.ovmLockM
+	testCounter=`cat /tmp/testCounter.ovmLockM`
 	# Generates a new monitor id number, to differentiate tests at similar time.
 	monID=`awk -v min=10 -v max=99 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
 	echo "$monID" > /tmp/monID.ovmLockM
     [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logsOvsServer/*|egrep -v xFiles);do echo "Xstart_$monID" >> $log;done
 	[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logsOvmManager/*|egrep -v xFiles);do echo "Xstart_$monID" >> $log;done
-    # XstopMonitoring to monitor until user decides to stop monitoring
-	XstopMonitoring
+    
+	# If desire is not menu option, then XstopMonitoring to monitor until user decides to stop monitoring
+	if [ "$desire" != "menu" ];then
+		XstopMonitoring
+	fi
 }
-
-
 
 # run OvmLogTool.py and organize OVM Manager AdminServer logs
 adminserver_py(){
@@ -173,6 +174,9 @@ organizer(){
 
 # For collecting the data after the tests are over
 collectData(){
+	# installation logs
+		[ "$type" = "ovs" ]&&[ `ls -1tr /root/install.log* 2>/dev/null|tail -1|wc -l` -gt 0  ]&&cp -p `ls -1tr /root/install.log*|tail -1` /tmp/logsOvsServer/xFiles/ 
+		[ "$type" = "ovmm" ]&&[ `ls -1tr /var/log/ovmm/* 2>/dev/null|tail -1|wc -l` -gt 0  ]&&cp -p `ls -1tr /var/log/ovmm/*|tail -1` /tmp/logsOvmManager/xFiles/  2>/dev/null
 	if [ -d /tmp/logsOvmManager/ ];then
 	    clear
 		echo "Collecting the logs, then terminate the monitoring processes(tails)"
@@ -187,6 +191,8 @@ collectData(){
 	else
 		echo "/tmp/logs_OV* does not exist, there is no logs to collect"
 	fi
+	
+	
 }
 # For Monitoring the logs
 monitorLogs(){
@@ -225,24 +231,7 @@ monitorLogs(){
 
 }
 
-case $desire in
-monitor|m|M)
-	clear
-	monitorLogs
-	# call XstartMonitoring funtion for monitoring the test
-	XstartMonitoring	
-	;;
-c|C)
-    clear
-    collectData
-	;;
-runtest|r|R)
-	# Take the test counter number from /tmp/testCounter.ovmLockM
-	testCounter=`cat /tmp/testCounter.ovmLockM`
-	testName=$2
-	trigger=$3
-	monID=`cat /tmp/monID.ovmLockM`
-	
+runningTest(){
 	if [ "$trigger" = "start" ];then
         testCounter=`cat /tmp/testCounter.ovmLockM`
 		# start run a test start
@@ -259,19 +248,127 @@ runtest|r|R)
 	    echo "Error: Please use a valid trigger, whether: start or stop"
 	    case_null
     fi
-	;;
-organize|o|O)
-	pwdLogs=$2
-    clear
-	# Organize the logs
-	organizer
-	
-	if [ "$type" = "ovs" ];then
-		hideGarbage
-		echo -e "Check for the OVM Manager logs in: \n# cd `pwd`"
-	fi
-	;;
-*)
+}
+
+menu(){
+	echo "------------------------------------------------------------------"
+	echo " OVM Logs Monitor with PID: $mypid and MonitorID: $monID			"
+	echo "------------------------------------------------------------------"
+	echo " Please write one of the below options and enter:					"
+	echo "																	"
+	echo "	s: Start new test												"
+	echo "	p: stoP the test												"
+	echo "	l: add a Line in the collected logs								"
+	echo "	c: stop monitoring, and collect all the logs					"
+	echo "------------------------------------------------------------------"
+	read alternative
+	clear
+}	
+
+# in case desire is Menu
+desireMenu(){
+	monitorLogs
+	# call XstartMonitoring funtion for monitoring the test
+	XstartMonitoring
+	clear
+	echo "------------------------------------------------------------------"
+	echo "- Welcome 											   			"
+	echo "------------------------------------------------------------------"
+	menu
+	while [ "$alternative" != "c" ]	;do
+		case $alternative in 
+			s|S|start|START)
+				testName="test"
+				trigger="start"
+				runningTest
+				clear
+				echo "------------------------------------------------------------------"
+				echo "- Test $testCounter 											   "
+				echo "- Run the test, and next write p to stoP this test			   "
+				echo "------------------------------------------------------------------"
+				menu
+				;;
+			p|stop|STOP)
+				testName="test"
+				trigger="stop"
+				runningTest
+				clear
+				echo "------------------------------------------------------------------"
+				echo "- Test is done									                "
+				echo "------------------------------------------------------------------"
+				menu
+				;;
+			l|line|LINE)
+				clear
+				for logX in $(ls -1 /tmp/logsOv*/*|egrep -v xFiles);do 
+					echo "-----------------------------------------------------" >> $logX
+				done
+				echo "------------------------------------------------------------------"
+				echo "- Done, line was added in the collected logs					    "
+				echo "------------------------------------------------------------------"
+				menu
+				;;
+			*)
+				clear
+				echo "------------------------------------------------------------------"
+				echo "- Value no valid: $alternative									"
+				echo "- Please select a valid option from the menu						"
+				echo "------------------------------------------------------------------"
+				menu
+				;;
+		esac 
+	done
+	# Stop and collect the logs
+	[ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logsOvsServer/*|egrep -v xFiles);do echo "Xstop_$monID" >> $log;done
+	[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logsOvmManager/*|egrep -v xFiles);do echo "Xstop_$monID" >> $log;done	
+	# collect all the logs
+	collectData
+	# Terminante monitoring processes
+	pkill -TERM -P $mypid 2>/dev/null
+	clear                                                                      
+	echo -e "\n`clear`\n--------------------------------------------------------------\n"
+	echo -e "- Done, please attach the /tmp/logsOv*.tar.gz file to the SR - "
+	echo -e "\n--------------------------------------------------------------\n`ls -1 /tmp/logsOv*`\n"
+	echo " "
+	exit 0	
+}
+
+
+case $desire in
+	menu)
+		desireMenu
+		;;
+	monitor|m|M)
+		clear
+		monitorLogs
+		# call XstartMonitoring funtion for monitoring the test
+		XstartMonitoring	
+		;;
+	c|C)
+		clear
+		collectData
+		;;
+	runtest|r|R)
+		# Take the test counter number from /tmp/testCounter.ovmLockM
+		testCounter=`cat /tmp/testCounter.ovmLockM`
+		testName=$2
+		trigger=$3
+		monID=`cat /tmp/monID.ovmLockM`
+
+		runningTest
+		;;
+	organize|o|O)
+		pwdLogs=$2
+		clear
+		# Organize the logs
+		organizer
+		
+		if [ "$type" = "ovs" ];then
+			hideGarbage
+			echo -e "Check for the OVM Manager logs in: \n# cd `pwd`"
+		fi
+		;;
+	*)
       case_null
 	;;
 esac
