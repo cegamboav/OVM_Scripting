@@ -364,7 +364,6 @@ case $desire in
 		organizer
 		
 		if [ "$type" = "ovs" ];then
-			hideGarbage
 			echo -e "Check for the OVM Manager logs in: \n# cd `pwd`"
 		fi
 		;;
