@@ -22,21 +22,21 @@ fi
 
 case_null(){
     clear
-	echo -e "\n Please run again the script using a valid option\n\n" 
+    echo -e "\n Please run again the script using a valid option\n\n" 
     echo -e " .ovmLogsMonitor.sh <desire> <options/parameters> \n\n"
-	echo -e "desire:"	
+    echo -e "desire:"	
     echo "  m : For Monitoring"
     echo -e "\t./ovmLogsMonitor.sh monitor\n"
     echo "  c : For Collecting data"             
     echo -e "\t./ovmLogsMonitor.sh c \n"
     echo "  r : Run a manual test" 	
-	echo "      ovmLogsMonitor.sh must be monitoring first" 	
-	echo "      Use the same name for the test for start and stop" 		
+    echo "      ovmLogsMonitor.sh must be monitoring first" 	
+    echo "      Use the same name for the test for start and stop" 		
     echo -e "\t./ovmLogsMonitor.sh runtest <testName> <start/stop> \n"
     echo "  o : Extract logs to output files" 
     echo -e "\t./ovmLogsMonitor.sh o <path where is the uncompressed .tar.gz> \n"	     
-	echo ""
-	exit 1
+    echo ""
+    exit 1
 }
 
 # Finish the script and terminates all subprocesses
@@ -59,7 +59,7 @@ continue=wait
 	# collect all the logs
 	collectData
 	# Terminante monitoring processes
-    pkill -TERM -P $mypid 2>/dev/null
+	pkill -TERM -P $mypid 2>/dev/null
 	clear                                                                      
 	echo -e "\n`clear`\n--------------------------------------------------------------\n"
 	echo -e "- Done, please attach the /tmp/logsOv*.tar.gz file to the SR - "
@@ -78,7 +78,7 @@ XstartMonitoring(){
 	# Generates a new monitor id number, to differentiate tests at similar time.
 	monID=`awk -v min=10 -v max=99 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
 	echo "$monID" > /tmp/monID.ovmLockM
-    [ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logsOvsServer/*|egrep -v xFiles);do echo "Xstart_$monID" >> $log;done
+	[ "$type" = "ovs" ]&&for log in $(ls -1 /tmp/logsOvsServer/*|egrep -v xFiles);do echo "Xstart_$monID" >> $log;done
 	[ "$type" = "ovmm" ]&&for log in $(ls -1 /tmp/logsOvmManager/*|egrep -v xFiles);do echo "Xstart_$monID" >> $log;done
     
 	# If desire is not menu option, then XstopMonitoring to monitor until user decides to stop monitoring
