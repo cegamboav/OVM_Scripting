@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Name        	: ovmLogsMonitor.sh
-# Author      	: david.cerdas@oracle.com
+# Author      	: david.cerdas
 # Version     	: 1.0
 # Copyright   	: GPLv2
 # Description	: Oracle OVM Manager/OVS script to replicate an issue
