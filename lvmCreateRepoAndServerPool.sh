@@ -4,7 +4,9 @@
 # Author      	: david.cerdas
 # Version     	: 1.0
 # Copyright   	: GPLv2
-# Description   : This script helps to create 2 NFS shares using a single disk
+# Description   : This script helps to create 2 NFS shares using a single disk, 
+#                 by installing the nfs packages, and configure the lvm volumes in 
+#                 /etc/exports and /etc/fstab
 # Usage         : lvmCreateRepoAndServerPool.sh "/dev/disk"
 
 
@@ -40,9 +42,11 @@ if [ -z != $1 ];then
 	echo '/storage/repository  *(rw,no_root_squash)' >> /etc/exports
 	echo '/storage/serverPool *(rw,no_root_squash)' >> /etc/exports
 	# In case of ol5 or ol6
+	service nfs start
 	chkconfig nfs on
 	exportfs -a
-	
+	clear
+	exportfs	
 else
 	echo "Please specify the disk to use"
 	echo "lvmCreateRepoAndServerPool.sh '/dev/sdb' "
