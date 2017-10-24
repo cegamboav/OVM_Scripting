@@ -10,6 +10,8 @@
 
 
 if [ -z != $1 ];then
+	yum install nfs-utils nfs-utils-lib -y
+	clear
 	pvcreate $1
 	vgcreate vgStorage $1
 	vgs
@@ -34,6 +36,13 @@ if [ -z != $1 ];then
 	mount /storage/serverPool
 	clear
 	df |egrep "repository|serverPool"
+	
+	echo '/storage/repository  *(rw,no_root_squash)' >> /etc/exports
+	echo '/storage/serverPool *(rw,no_root_squash)' >> /etc/exports
+	# In case of ol5 or ol6
+	chkconfig nfs on
+	exportfs -a
+	
 else
 	echo "Please specify the disk to use"
 	echo "lvmCreateRepoAndServerPool.sh '/dev/sdb' "
