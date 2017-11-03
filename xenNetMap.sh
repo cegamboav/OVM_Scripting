@@ -3,9 +3,8 @@
 # Author      	: @djcerdas
 # Version     	: 1.0
 # Copyright   	: GPLv2
-# Description	: This script helps to organize and map the interfaces 
-#					associate with each xen bridge in OVM
-# Usage			: ./bridgeMap.sh "<Path to the sosreport>"
+# Description	: This script helps to map the interfaces in xen bridge - OVM
+# Usage		: ./bridgeMap.sh "<Path to the sosreport>"
 
 sosreport=$1
 
