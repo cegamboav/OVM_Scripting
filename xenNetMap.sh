@@ -4,7 +4,7 @@
 # Version     	: 1.0
 # Copyright   	: GPLv2
 # Description	: This script helps to map the interfaces in xen bridge - OVM
-# Usage		: ./bridgeMap.sh "<Path to the sosreport>"
+# Usage		: ./xenNetMap.sh "<Path to the sosreport>"
 
 sosreport=$1
 
@@ -71,5 +71,5 @@ else
 	clear
    echo "Please specify a valid path to the sosreport"
    echo "Usage			: 						"
-   echo ' ./bridgeMap.sh "<Path to the sosreport>"  '
+   echo ' ./xenNetMap.sh "<Path to the sosreport>"  '
 fi
