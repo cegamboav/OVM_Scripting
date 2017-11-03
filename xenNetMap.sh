@@ -1,7 +1,7 @@
 #!/bin/bash
 # Name        	: xenNetMap.sh
 # Author      	: @djcerdas
-# Version     	: 1.0
+# Version     	: 0.2
 # Copyright   	: GPLv2
 # Description	: This script helps to map the interfaces in xen bridge - OVM
 # Usage		: ./xenNetMap.sh "<Path to the sosreport>"
