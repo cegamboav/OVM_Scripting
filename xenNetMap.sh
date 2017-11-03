@@ -33,6 +33,7 @@ if [ -d $sosreport/sos_commands ];then
 		fi
 	done
 	echo ----------------------------------------------------------------------------
+	echo ----------------------------------------------------------------------------
 	for bridgej in "${bridge[@]}";do
 		# Obtain physical interfaces of a bridge 
 		for bondj in "${bond[@]}"; do
