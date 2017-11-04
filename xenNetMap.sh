@@ -21,50 +21,86 @@ if [ -d $sosreport/sos_commands ];then
 	cd 	$sosreport/sos_commands/networking/
 
 	# Create an Array for each type of interface
-	for interface in $(egrep -v "link|inet|lo" ip_address|awk '{print $2}'|tr -d :);do 
+	for interface in $(egrep -v "link|inet|lo|forever" ip_address|awk '{print $2}'|tr -d :);do 
 		if	[[ ${interface} == *eth* ]]; then
 				eth+=($interface)
 		elif [[ ${interface} == *bond* ]]; then
-				bond+=($interface)
+			if [ $(echo ${interface}|egrep '@'|wc -l) -eq 1 ];then
+				bondV+=($interface)	
+			else
+				bond+=($interface)				
+			fi	
 		elif [[ ${interface} == *vif* ]]; then
 				vif+=($interface)
 		else 
 				bridge+=($interface)
 		fi
 	done
-	echo ----------------------------------------------------------------------------
-	echo ----------------------------------------------------------------------------
+	echo -----------------------------------------------------------------------------------------------
+	echo -----------------------------------------------------------------------------------------------
+	cont=0
 	for bridgej in "${bridge[@]}";do
 		# Obtain physical interfaces of a bridge 
 		for bondj in "${bond[@]}"; do
 			if [ $(egrep "$bondj.*$bridgej" ip_address|wc -l) -gt 0 ];then
-			# array for the interfaces of the bond
+				# array for the interfaces of the bond
 				for subint in $(egrep "master $bondj" ip_address|awk '{ print $2}'|tr -d \: );do 
-				bondjA+=($subint)
+					bondjA+=($subint)
 				done
 			fi
-			if [ $(egrep $bridgej  ip_address|grep $bondj|wc -l) -eq 1 ];then 
-				# now check which vif are part of the bridge
-				cont=0
-				for vifj in "${vif[@]}";do
-					if [ ${cont} -eq 0 ]&&[ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ];then 
-						echo "${bondjA[$cont]}	----	$bondj	----	$bridgej	----	$vifj"
-						let "cont++"
-					elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -gt $cont ]&&[ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ];then  
-						echo "${bondjA[$cont]}	--|					|--	$vifj"
-						let "cont++"							
-					elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -gt $cont ];then  
-						echo "${bondjA[$cont]}	--|					"
-						let "cont++"
-					elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -le $cont ]&& [ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ];then                                    					
-						echo "						|--	$vifj"
-						let "cont++"
-					fi
+				for vlan in  "${bondV[@]}";do				 
+					# now check which vif are part of the bridge
+					for vifj in "${vif[@]}";do
+						# prints whole line that was mapped
+						if [ ${cont} -eq 0 ]&&[ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ]&&[ $(echo $vlan|egrep ${bondj[$cont]}|wc -l) -gt 0 ]&&[ $(egrep "$vlan.*$bridgej" ip_address|wc -l) -gt 0 ];then 
+							echo -----------------------------------------------------------------------------------------------
+							echo "${bondjA[$cont]}	----	$bondj	----	$vlan	----	$bridgej	----	$vifj"
+							let "cont++"				
+						elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -gt $cont ]&&[ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ];then  
+							echo "${bondjA[$cont]}	--|								|--	$vifj"
+							let "cont++"							
+						elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -gt $cont ];then  
+							echo "${bondjA[$cont]}	--|					"
+							let "cont++"
+						elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -le $cont ]&& [ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ]&&[ $(egrep "$vlan.*$bridgej" ip_address|wc -l) -gt 0 ];then                                    					
+							echo "						|--	$vifj"
+							let "cont++"
+						# If the bridge has no vif associated
+						elif [ ${cont} -eq 0 ]&&[ $(echo $vlan|egrep ${bondj[$cont]}|wc -l) -gt 0 ]&&[ $(egrep "$vlan.*$bridgej" ip_address|wc -l) -gt 0 ]&&[ $(egrep "$bridgej" ip_address|egrep vif|wc -l) -eq 0 ];then   
+							echo -----------------------------------------------------------------------------------------------
+							echo "${bondjA[$cont]}	----	$bondj	----	$vlan	----	$bridgej	----"
+							let "cont++"	
+						elif [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -gt $cont ]&&[ $(egrep "$bridgej" ip_address|egrep vif|wc -l) -eq 0 ];then
+							echo "${bondjA[$cont]}	--|					"
+							let "cont++"
+						# If the bond has vif but not VLAN associated
+						elif [ ${cont} -eq 0 ]&&[ $(egrep "${bondj[$cont]}" ip_address|egrep '@'|wc -l) -eq 0 ]&&[ $(egrep "${bondj[$cont]}.*$bridgej" ip_address|wc -l) -eq 1 ]&&[ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ];then   
+							echo -----------------------------------------------------------------------------------------------
+							echo "${bondjA[$cont]}	----	$bondj	----	----	$bridgej	----	$vifj"
+							let "cont++"	
+						elif [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -gt $cont ]&&[ $(egrep "${bondj[$cont]}" ip_address|egrep '@'|wc -l) -eq 0 ]&&[ $(egrep "${bondj[$cont]}.*$bridgej" ip_address|wc -l) -eq 1 ]&&[ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ];then   
+							echo "${bondjA[$cont]}	--|					|--	$vifj"
+							let "cont++"
+						elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -gt $cont ]&&[ $(egrep "${bondj[$cont]}" ip_address|egrep '@'|wc -l) -eq 0 ]&&[ $(egrep "${bondj[$cont]}.*$bridgej" ip_address|wc -l) -eq 1 ];then 
+							echo "${bondjA[$cont]}	--|					"
+							let "cont++"
+						elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -le $cont ]&&[ $(egrep "${bondj[$cont]}" ip_address|egrep '@'|wc -l) -eq 0 ]&&[ $(egrep "${bondj[$cont]}.*$bridgej" ip_address|wc -l) -eq 1 ]&& [ $(egrep "$vifj.*$bridgej" ip_address|wc -l) -gt 0 ];then
+							echo "						|--	$vifj"
+							let "cont++"
+						fi
+					done
 				done
-				cont=0
-				echo ----------------------------------------------------------------------------
-			fi
+				# If the bond doesn't have vif nor VLAN associated							
+				if [ $(egrep "${bondj[$cont]}" ip_address|egrep '@'|wc -l) -eq 0 ]&&[ $(egrep "${bondj[$cont]}.*$bridgej" ip_address|wc -l) -eq 1 ]&&[ $(egrep "$bridgej" ip_address|egrep vif|wc -l) -eq 0 ];then   
+					echo -----------------------------------------------------------------------------------------------
+					echo "${bondjA[$cont]}	----	$bondj	----	$bridgej	----"
+					let "cont++"	
+				elif  [ ${cont} -gt 0 ]&&[ ${#bondjA[@]} -gt $cont ]&&[ $(egrep "${bondj[$cont]}" ip_address|egrep '@'|wc -l) -eq 0 ]&&[ $(egrep "${bondj[$cont]}.*$bridgej" ip_address|wc -l) -eq 1 ]&&[ $(egrep "$bridgej" ip_address|egrep vif|wc -l) -eq 0 ];then 
+					echo "${bondjA[$cont]}	--|					"
+					let "cont++"
+				fi				
 		bondjA=()
+		cont=0
 		done
 	done
 else
