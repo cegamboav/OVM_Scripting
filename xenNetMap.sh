@@ -22,7 +22,7 @@ if [ -d $sosreport/sos_commands ];then
 
 	# Create an Array for each type of interface
 	for interface in $(egrep -v "link|inet|lo|forever" ip_address|awk '{print $2}'|tr -d :);do 
-		if	[[ ${interface} == *eth* ]]; then
+		if[[ ${interface} == *eth* ]]||[[ ${interface} == em* ]]; then
 				eth+=($interface)
 		elif [[ ${interface} == *bond* ]]; then
 			if [ $(echo ${interface}|egrep '@'|wc -l) -eq 1 ];then
