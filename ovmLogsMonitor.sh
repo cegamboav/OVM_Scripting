@@ -12,7 +12,7 @@
 desire=$1
 
 # Find the OVM type
-if [ -e /etc/ovs-release ];then
+if [ -e /etc/ovs-release ]||[ -d /etc/ovs-agent ];then
 	type="ovs"
 elif [ -e `find /u01 -name .config 2>/dev/null` ];then 
 	type="ovmm"
