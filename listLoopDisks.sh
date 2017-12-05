@@ -6,7 +6,7 @@
 # Copyright   	: GPLv2
 # Description	: This script lists the disks and its correspond loop , 
 # 		   based on the vm.cfg file of the running VMs in Dom0, OVM.	
-# Usage		:		
+# Usage		: ./listLoopDisks.sh 	
 
 clear
 echo "Server Name:"
