@@ -5,8 +5,8 @@
 # Version     	: 1
 # Copyright   	: GPLv2
 # Description	: This script lists the disks and its correspond loop , 
-# 				  based on the vm.cfg file of the running VMs in Dom0, OVM.	
-# usage			:		
+# 		   based on the vm.cfg file of the running VMs in Dom0, OVM.	
+# Usage		:		
 
 clear
 echo "Server Name:"
@@ -22,7 +22,6 @@ for i in `xm list|awk '{print $1}'|egrep -v 'Name|Domain-0'`;
                 cat $j/vm.cfg|egrep 'OVM_simple_name'
                 echo
                 cat $j/vm.cfg|egrep 'disk' > /tmp/disk.tmp
-
                 echo "Loops:"
                 echo
                 echo > /tmp/disk2.tmp
