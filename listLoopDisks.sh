@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Name        	: listLoopDisks.sh
-# Author      	: carlos.gamboa and david.cerdas
+# Author      	: carlos.gamboa, david.cerdas and luis.alvarez
 # Version     	: 1
 # Copyright   	: GPLv2
 # Description	: This script lists the disks and its correspond loop , 
