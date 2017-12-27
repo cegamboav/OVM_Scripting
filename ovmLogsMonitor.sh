@@ -217,6 +217,7 @@ monitorLogs(){
 		tail -f /var/log/ovm-consoled.log >> /tmp/logsOvsServer/ovm-consoled.log &	
 		tail -f /var/log/ovs-agent.log >> /tmp/logsOvsServer/ovs-agent.log &
 		tail -f /var/log/ovmwatch.log >> /tmp/logsOvsServer/ovmwatch.log &
+		tail -f  /var/log/devmon.log  >> /tmp/logsOvsServer/devmon.log &
 		tail -f /var/log/messages >> /tmp/logsOvsServer/messages.log &
 		tail -f /var/log/dmesg >> /tmp/logsOvsServer/dmesg.log &		
 		[ -e /var/log/yum.log ] && tail -f /var/log/yum.log >> /tmp/logsOvsServer/yum.log &
