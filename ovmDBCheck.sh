@@ -18,9 +18,11 @@ grep backup $adminLog|egrep inconsistencies|tail -5
 printf "\n----------------------\n"
 printf "DB issues:\n"
 printf "\nFirst messages:\n"
+egrep "Not enough disk space" $adminLog|head -n2
 grep 'odof.exception.ObjectNotFoundException' -B 1 $adminLog|head -6
 printf "\n--------------\n"
 printf "\nLast messages:\n"
 egrep 'odof.exception.ObjectNotFoundException' -B 1 $adminLog|tail -6
 printf "\n----------------------\n"
-egrep "Not enough disk space" $adminLog|head -n2
+printf "\n Current FS utilization:\n"
+df -Th $(awk -F'=' '/^DBBACKUP=/ {print $2}' /etc/sysconfig/ovmm)
