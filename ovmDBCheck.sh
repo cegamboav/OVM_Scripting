@@ -2,27 +2,42 @@
 
 # Name        : ovmDBCheck.sh
 # Author      : carlos.gamboa , david.cerdas  
-# Version     : 1
+# Version     : 1.1
 # Copyright   : GPLv2
-# Description : Oracle OVM Manager/OVS script to check the OVM Manager DB for known inconsistencies
+# Description : This script checks the messages for known OVM Manager DB errors
 
+clear&&printf "Starting the analysis...\n\n\n"
+adminLog=$(find /u01 -name AdminServer.log)
+adminOut=$(find /u01 -name AdminServer.out|egrep -v ovm_wlst)
+config=$(find /u01 -name .config)
 
-adminLog=`find /u01 -name AdminServer.log`
-echo $adminLog
-printf "\nChecking the backups:\n----------------------\n"
+# Check the logs for known errors
+function messagesIdentifier(){
+	grep 'odof.exception.ObjectNotFoundException|Not.*enough.*space|inconsistencies|MySQLSyntaxErrorException.*Table.*doesn.*exist' -B 1 $1|$2 -2
+}
+
+# Print the current OVM Manager version
+clear&&printf "OVM Version:\n\n$(cat $config) \n\n----------------------\n"
+
+# Check for complete backups of the OVM DB
 printf "Last complete backups:\n"
-grep backup $adminLog|grep complete|tail -5
-printf "\n----------------------\n"
-printf "Inconsistencies:\n"
-grep backup $adminLog|egrep inconsistencies|tail -5
-printf "\n----------------------\n"
-printf "DB issues:\n"
-printf "\nFirst messages:\n"
-egrep "Not enough disk space" $adminLog|head -n2
-grep 'odof.exception.ObjectNotFoundException' -B 1 $adminLog|head -6
-printf "\n--------------\n"
-printf "\nLast messages:\n"
-egrep 'odof.exception.ObjectNotFoundException' -B 1 $adminLog|tail -6
-printf "\n----------------------\n"
-printf "\n Current FS utilization:\n"
+awk '/backup complete/ {print $1" "$18" "$19}' $adminLog|tail -4
+
+# Print the first and last OVM DB errors found
+printf "\n----------------------\nDB issues:\n\n"
+	for flag in First Last;do
+		printf "$flag messages:\n"
+		for file in $adminLog $adminOut;do
+			if [ "$flag" = "First" ];then 
+				messagesIdentifier $file tail
+			elif [ "$flag" = "Last" ];then
+				messagesIdentifier $file head	
+			fi
+		done	
+		printf "\n--------------------------------------------\n"
+	done
+
+printf "Current FS utilization:\n"
 df -Th $(awk -F'=' '/^DBBACKUP=/ {print $2}' /etc/sysconfig/ovmm)
+
+exit 0
