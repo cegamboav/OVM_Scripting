@@ -2,7 +2,7 @@
 
 # Name        : ovmDBCheck.sh
 # Author      : carlos.gamboa , david.cerdas  
-# Version     : 1.1
+# Version     : 1.2
 # Copyright   : GPLv2
 # Description : This script checks the messages for known OVM Manager DB errors
 
@@ -13,7 +13,8 @@ config=$(find /u01 -name .config)
 
 # Check the logs for known errors
 function messagesIdentifier(){
-	grep 'odof.exception.ObjectNotFoundException|Not.*enough.*space|inconsistencies|MySQLSyntaxErrorException.*Table.*doesn.*exist' -B 1 $1|$2 -2
+	egrep 'odof.exception.ObjectNotFoundException|MySQLSyntaxErrorException.*Table.*doesn.*exist' -B 1 $1|$2 -2
+	egrep 'Not.*enough.*space|inconsistencies' $1|$2 -2
 }
 
 # Print the current OVM Manager version
@@ -29,9 +30,9 @@ printf "\n----------------------\nDB issues:\n\n"
 		printf "$flag messages:\n"
 		for file in $adminLog $adminOut;do
 			if [ "$flag" = "First" ];then 
-				messagesIdentifier $file tail
-			elif [ "$flag" = "Last" ];then
 				messagesIdentifier $file head	
+			elif [ "$flag" = "Last" ];then
+				messagesIdentifier $file tail
 			fi
 		done	
 		printf "\n--------------------------------------------\n"
