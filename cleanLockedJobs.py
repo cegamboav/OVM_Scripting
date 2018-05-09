@@ -14,9 +14,9 @@ ss=om.getObjects(Server)
 for s in ss:
 	lockingJob = s.getLockingJob()
 	if lockingJob != None:
-		print "Found Locking Job, attempting to abort the job"
+		print ("Found Locking Job, attempting to abort the job")
 		j=om.createJob("Abort Lock")
 		j.begin()
 		lockingJob.abort()
 		j.commit()
-printf("Done. Thanks")
+print ("Done. Thanks")
