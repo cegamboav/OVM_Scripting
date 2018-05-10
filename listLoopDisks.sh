@@ -38,19 +38,19 @@ run_all(){
 
         for i in $(echo "$xmli"); do
                 for j in `find /OVS/Repositories/ -name $i`; do
-                        echo "VM Name                           ID"
+                        echo "VM_Name ID"
                         echo `cat $j/vm.cfg|egrep 'OVM_simple_name'|cut -d"=" -f2|cut -d"'" -f2`"                       "$i
                         echo
                         disk="$(cat $j/vm.cfg|egrep 'disk')"
-                        echo "Device                                            Repository                      Loop"
+                        echo "Device Repository Loop"
                         disk2="$(echo $disk|awk -F"'" '/disk/ { for (i = 2; i <= NF; i=i+2) print $i }'|cut -d':' -f2|cut -d"," -f1)"
                         for h in $(echo "$disk2"|grep -v cdrom); do
                                 repo="$(echo $h|cut -d'/' -f4)"
-                                echo ""`echo $h|cut -d'/' -f6`"         "`grep OVS_REPO_ALIAS /OVS/Repositories/$repo/.ovsrepo|cut -d"=" -f2`"                      "`losetup -j $h|awk '{print $1}'|cut -d':' -f1`
+                                echo ""`echo $h|cut -d'/' -f6`" "`grep OVS_REPO_ALIAS /OVS/Repositories/$repo/.ovsrepo|cut -d"=" -f2`" "`losetup -j $h|awk '{print $1}'|cut -d':' -f1`
                         done
-                        echo ""
+                        echo "------------"
                 done
-        done
+        done|column -t
 }
 
 run_list(){
@@ -59,17 +59,17 @@ run_list(){
         else
                 xmli="$(xm list $2|egrep -v 'Name|Domain-0'|awk '{print $1}' 2>&1)"
         fi
-        echo "VM Name                   Device                                  Repository              Loop"
-        for i in $(echo "$xmli"); do
+        echo "VM_Name 	Device		 			Repository 	Loop"
+		for i in $(echo "$xmli"); do
                 for j in `find /OVS/Repositories/ -name $i`; do
                         disk="$(cat $j/vm.cfg|egrep 'disk')"
                         disk2="$(echo $disk|awk -F"'" '/disk/ { for (i = 2; i <= NF; i=i+2) print $i }'|cut -d':' -f2|cut -d"," -f1)"
                         for h in $(echo "$disk2"|grep -v cdrom); do
                                 repo="$(echo $h|cut -d'/' -f4)"
-                                echo `cat $j/vm.cfg|egrep 'OVM_simple_name'|cut -d"=" -f2|cut -d"'" -f2`"               "`echo $h|cut -d'/' -f6`"   "`grep OVS_REPO_ALIAS /OVS/Repositories/$repo/.ovsrepo|cut -d"=" -f2`"          "`losetup -j $h|awk '{print $1}'|cut -d':' -f1`
+                                echo `cat $j/vm.cfg|egrep 'OVM_simple_name'|cut -d"=" -f2|cut -d"'" -f2`" "`echo $h|cut -d'/' -f6`" "`grep OVS_REPO_ALIAS /OVS/Repositories/$repo/.ovsrepo|cut -d"=" -f2`" "`losetup -j $h|awk '{print $1}'|cut -d':' -f1`|column -t
                         done
                 done
-        done
+        done|column -t
 }
 
 
