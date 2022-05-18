@@ -1,0 +1,568 @@
+Bash scripting course:
+
+Empezamos desde 0, pero si debes saber algo de linux para entender mejor el curso.
+
+1) porque usar scripts de bash tiene sentido:
+
+	Muchas de las partes del OS y aplicaciones son escritas en bash
+	
+---------------------------------------------------------------------------------
+2) que es un scripting
+	es un algoritmo
+		una serie de pasos ordenados para hacer algo.
+	
+---------------------------------------------------------------------------------
+3) Escoger un editor!
+	vim
+	notepadd++
+	vi
+
+---------------------------------------------------------------------------------
+4) Agregar #!/bin/bash       "shebang"
+	es para que la shell que se esta usando entienda el leguaje que esta usando.
+	
+---------------------------------------------------------------------------------
+5) comment lines
+
+---------------------------------------------------------------------------------
+6) lineas en blanco
+
+---------------------------------------------------------------------------------
+7) Exit status del script.      
+
+echo $?
+
+0 = good
+1 = some error
+2 o more = specific errors
+
+---------------------------------------------------------------------------------
+8) Guardar o accesar un archivo desde un archivo
+
+Desde el script se acceso relativamente desde donde estamos parados o dando un path completo.
+
+---------------------------------------------------------------------------------
+9) permisos de ejecucion!
+
+---------------------------------------------------------------------------------
+10) agregar el script a la lista de comandos que se ejecutan
+
+Agregar la carpeta dentro de $PATH
+
+script name is uniq and should be very carefull.
+
+usar el comando which.
+
+---------------------------------------------------------------------------------
+11) ayuda
+
+man bash
+
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Lesson 2
+
+Working with variables and parameters
+
+---------------------------------------------------------------------------------
+1) empezando describiendo que es un argumento: cualquier cosa que se pasa a un comando
+
+despues describir que es una opcion: es un parametro que cambia el comportamiento del script, sigue siendo un argumento
+
+parametro: es un puntero de memoria con un valor que se va a asignar a una constante dentro del script.
+
+variable: es un punto de memoria que puede cambiar o variar en el transcurso del la ejecucion del script.
+
+---------------------------------------------------------------------------------
+2) Definir variables
+
+nombre de las variables: estas son case sensitive, preferiblemente usar mayusculas (es una recomendacion)
+
+Existen tres formas de definir una variable:
+
+2.1) static: de manera que uno la define con un =
+2.2) como un argumento recibido a la hora de ejecucion del script.
+2.3) dinamicamente con read.
+
+Recordar que se declara una variable en un shell esta no existe en una subshell.
+
+Como imprimir el contenido de las variables y las '' muestran la variable sin el contenido de la variable!
+
+---------------------------------------------------------------------------------
+3) Usar read
+
+---------------------------------------------------------------------------------
+4) Sourcing
+
+El contenido de un script puede ser usado o agregado en un nuevo script.
+
+No use exit al final del script
+
+---------------------------------------------------------------------------------
+5) quoting "Comillas"
+
+Son los caracteres con algun tipo de significado en bash
+
+ejemplo: echo 2 * 3 > 5
+
+Las comillas dobles ignoran: pipes "|", aliases, tilde substitution, wildcard expression y splitting into words using delimeters.
+
+Las comillas dobles aceptan parametros de substitucion, comandos de substitucion y evaluacion de expresiones aritmeticas.
+
+Best practice: usar siempre comillas simples a menos de que sea extrictamente necesario en uso de parametros, comandos o expresiones aritmeticas substitucion.
+
+---------------------------------------------------------------------------------
+6) Manejando argumentos
+
+todo lo que se pone despues del script
+
+$0 es el nambre del script como tal
+
+$1, $2, ... se refiere a los argumentos primero, segundo y asignar
+
+${nn}  para argumentos mayores que 9
+
+los argumentos son como constantes, estos no pueden ser cambiados a la hora de ejecutar el script, solo pueden ser leidos.
+
+$*		--> Toma todos los argumentos como si fueran uno solo
+$@		--> Va argumento por argumento
+
+[ -z ] test para ver si esta vacia
+
+---------------------------------------------------------------------------------
+7) Sustitucion de comandos
+
+`command` (deprecated)
+$(command) (prefered)
+
+name a file file@(date-%d-%m-%y)
+
+---------------------------------------------------------------------------------
+8) String verification
+
+test command    es para permite chequear propiedades.
+
+test -z --> para ver si esta vacia
+test --> es usado para chequear propiedades.
+
+[[ ... ]] --> para chequear patrones
+
+[[ $1=='[a-z]*' ]]         se valida que $1 empiece con una letra minuscula y seguido pues de cualquier cosa
+
+&&  -->> Comando que significa que si el previo comando devuelve un valor valido continua con el segundo
+|| -->> "o" si el valor es no valido entonces corre un segundo comando
+
+---------------------------------------------------------------------------------
+9) Here documents
+
+Es usado para desplegar mensajes largos en lugar de estar usando echo, por ejemplo:
+
+Nota: comando wall (Write all) es un comando para ser enviado a todos los usuarios que estan logueados en la red.
+
+#!/bin/bash
+#script that shows how text to be sent by wall
+#is feeded threugh a here document
+wall <<EndOfMessage
+The menu for today is:
+1.		Healthy soup and salad.
+2.		Chips and fish
+3.		Steak with carrots.
+EndOfMessage
+
+o 
+
+
+#!/bin/bash
+#script that shows how text to be sent by wall
+#is feeded threugh a here document
+cat <<EndOfMessage
+The menu for today is:
+1.		Healthy soup and salad.
+2.		Chips and fish
+3.		Steak with carrots.
+EndOfMessage
+
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Lesson 3		Transforming Input
+
+3.1) Working with substitution Operators
+
+un sustituto de operador (tambien conocido como "String Operator" te permite manipular valores de variables en una forma sencilla:
+
+- Sabiendo si la variable existe
+- Seteando valores default a variables
+- Atrapando errores que nacen al no existir una variable
+- Removiendo porciones del valor de una variable.
+
+
+a) ${VAR:-word}		si $VAR existe, use su valor, si no, regrese el valor "word", esto no setea el valor de la variable
+b) ${VAR:=word}		Si $VAR existe, use su valor, si no, setea el valor de la variable en "word"
+c) ${VAR:?message}		Si $VAR existe, muestre su valor, si no, despliega: VAR seguido del message, claro hay que setear el message, si no esta seteado va a desplegar null o not set.
+d) ${VAR:offset:length}	Si $VAR existe, muestre su valor, empezando en "offset" como numero de caracter y terminando en "length" como cantidad de caracteres, ejemplo:
+
+VAR=California
+${VAR:3:3}		Despliega: 		ifo
+
+
+ejemplos:
+# DATE=
+# echo $DATE
+
+a)
+# echo ${DATE:-today}
+today
+# echo $DATE
+
+b)
+# echo ${DATE:=today}
+today
+# echo $DATE
+today
+
+c) 
+# DATE=
+# echo ${DATE:?Variable not set}
+-bash: DATE: Variable not set.
+# echo $DATE
+
+d) 
+# DATE=$(date +%d-%m-%y)
+# echo the day is ${DATE:0:2}
+the day si 05
+
+---------------------------------------------------------------------------------
+3.2) Using Pattern Matching Operators
+
+- Usado para remover patrones de una variable
+- Es excelente para limpiar una varaible que tiene mucha information innecesaria:
+	- Por ejemplo si $DATE tiene 05-01-15 y solo necesitamos el dia
+	- O si se tiene un archivo con extencion *.doc y se quiere renombrar a *.txt
+	
+${VAR#pattern}		Busca un patron desde el inicio del valor de la variable y borra la parte mas cercana que machea y devuelve el resto.
+${VAR##pattern}		Busca un patron desde el inicio del valor de la variable y borra la parte mas lejos que machea y devuelve el resto.
+${VAR%pattern}		Busca un patron desde el final del valor de la variable y borra la parte mas pequena que machea y devuelve el resto.
+${VAR%%pattern}		Busca un patron desde el final del valor de la variable y borra la parte mas pequena que machea y devuelve el resto.
+
+ejemplo:
+
+#!/bin/bash
+BLAH=rababarabarabarara
+
+echo BLAH is $BLAH
+echo "The result of ##*ba is ${BLAH##*ba}"
+echo "The result of #*ba is ${BLAH#*ba}"
+echo "The result of %%*ba is ${BLAH%%*ba}"
+echo "The result of %*ba is ${BLAH%*ba}"
+
+---------------------------------------------------------------------------------
+3.3) Understanding Regular Expressions:
+
+Las regular expressions son buscadores de patrones, y los mas comunes son (grep, awk, sed, cut)
+
+grep= Generic regular expression pattern.
+
+Las regular expressions no son lo mismo que wildcards.
+
+Cuando usemos regular expressions, ponerlas entre comillas dobles para que el shell no las interprete.
+
+^text			Busca una linea que inicie con "text"
+text$			Busca una linea que finalice con "text"
+.				Wildcard que machea un unico caracter.
+[abc],[a-c]		Machea a, b o c
+*				Machea de 0 hasta infinito numero del caracter escrito previamente.
+\{2\}			Machea exactamente 2 del caracter previo.
+\{1,3\}			Machea minimo 1 y maximo 3 del caracter previo.
+?				Machea de 0 a 1 del previo caracter, lo que lo hace opcional.
+
+---------------------------------------------------------------------------------
+3.4) bash calculation
+
+Para hacer un calculo matematico
+
+4.0.1) Internal calculation:
+
+$(( 1 + 1 ))
+
+4.0.2) Calcular con let:
+
+$1 primer numero
+$2 operador
+$3 el segundo numero
+
+let x ="$1 $2 $3"
+echo $x
+
+4.0.3) External calculation con bc
+echo "scale=9; 10/3" | bc
+
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+
+Lesson 4		Using Essential External Tools:
+
+4.1) Using Grep
+
+grep -i
+
+grep -v
+
+grep -r
+
+grep -e   or egrep
+
+
+---------------------------------------------------------------------------------
+4.2) Using test
+
+
+test puede ser utilizado para testear muchas cosas:
+
+- Expressions: 			test (ls /etc/hosts) 			basicamente testear el resultado de un comando o de varios comandos
+- String:				test -z $1						testea si esta vacia la variable
+- integers				test $1 = 6						Compara si el valor de $1 es igual a 6
+- files					test file1 -nt file2			este compara si son iguales, por ejemplo para hacer copia solo si son diferentes.
+- propiedades			test -x file					basicamente compara si file contiene la opcion de executable (se puede tambien usar con write or read)
+
+Se puede utilizar de 3 maneras posibles:
+
+- test -z $1					De la manera antigua escribiendo el comando test antes de nada
+- [-z $1]						Dentro de un [], esto invoca al test de bash internal command.
+- [[ -z $1 ]]					Dentro de dobel [[...]] no es tan universal como [] el tiene && y ||
+
+---------------------------------------------------------------------------------
+4.3) Using cut and sort
+
+---------------------------------------------------------------------------------
+4.4) Tail and head
+
+---------------------------------------------------------------------------------
+4.5) sed		(todo un lenguaje de programacion)
+
+sed -n 5p /etc/passwd		Muestra la linea numero 5
+sed -i s/hello/bye/g /path/to/file		substituye hello por bye en el archivo file y lo escribe de una ves en el archivo.
+sed -i -e '5d'				Remueve la linea 5
+
+---------------------------------------------------------------------------------
+5.6) awk
+
+Forma basica para usar awk:
+
+awk '/search pattern/ {actions}' file
+
+el -F significa "field delimeter"
+
+awk -F : '{print $4}' /etc/passwd			Print la columna 4 del archivo
+
+awk -F : '/lisa/ {print $4}' /etc/passwd	busca por la palabra 'lisa' y despues imprime la columna 4
+
+awk -F : '/lisa/ {print $1,$NF}' /etc/passwd		Imprime en este caso la primera columna y $NF significa la ultima columna.
+
+awk -F : '$3 > 500' /etc/passwd				Imprime todas esas lineas que el valor de la columna 3 es mayor a 500
+
+awk -F : '$NF ~/bash' /etc/passwd			Imprime la linea si en su ultima columna contiene '/bash'
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+
+Lesson 5		Using conditional statement:
+
+5.1) if then fi:
+
+if expression
+then
+	command1
+	command2
+fi
+
+
+
+else:
+
+if expression
+then
+	command1
+else
+	command2
+fi
+
+
+
+
+elif:
+
+if expression
+then
+	command1
+elif expression2
+then
+	command2
+fi
+
+---------------------------------------------------------------------------------
+5.2) && and ||
+
+&& means and
+|| means or
+
+
+Cuando usamos &&, el segundo comando se ejecuta solo si el promer retorna un exit code de 0
+
+[ -z $1 ] && echo $1 is not defined					En este ejemplo, se utiliza el comando test, para saber si el primer parametro esta vacio.
+
+Cuando usamos ||, el segundo comando se ejecuta si el primer comando no retorna un exit code de 0.
+
+---------------------------------------------------------------------------------
+5.3) Using For
+
+for i in something
+do
+	command1
+	command2
+done
+
+for i $(cat /etc/hosts);do echo $i;done
+
+for i in {1..5};do echo $i;done
+
+al final i es solo una variable.
+
+---------------------------------------------------------------------------------
+
+5.4) using case
+
+case $opt in
+	a) command ;;
+	b) command2 ;;
+	c) command3 ;;
+	*) echo "No option difned"
+esac
+
+---------------------------------------------------------------------------------
+5.5) using while
+
+while true
+	command
+done
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+
+Lesson 6		Using Advanced Scripting options
+
+6.1 Working with options
+
+una opcion es algo que cambia el comportamiento del script.
+
+getopts		-->	es usado para trabajar con opciones.
+
+while getopts	"abc:" opt
+do
+	case $opt in
+		a) command ;;
+		b) command2 ;;
+		c) command3 ;;
+		*) echo "No option difned"
+	esac
+done
+
+---------------------------------------------------------------------------------
+6.2) using functions
+
+---------------------------------------------------------------------------------
+6.3) using Arrays
+
+un arrelgo es una variable string que puede almacentar multiples valores.
+
+definir un arreglo en blanco:
+names=()
+
+puedes nombrarlos de una sola ves
+names=(lida lisa laura lori)
+
+Definirlos en el lugar que se desea:
+names[0]=linda
+names[1]=lisa
+names[2]=laura
+names[3]=lori
+
+ver lo que hay dentro del arregly:
+
+echo ${names[2]}			Muestra el valor en la posicion 2
+echo ${names[@]}			Muestra todos los valores
+echo ${#names[@]}			muestra el total de valores que hay, 4 en este ejemplo.
+
+---------------------------------------------------------------------------------
+6.4) Defining menu interfaces
+
+utilizamos el comando herramienta llamada "select", por ejemplo:
+
+select DIR in /bin /usr /etc			Donde DIR es la varaible que guarla la opcion guardada y "/bin /usr /etc" son las opciones a escoger.
+
+Nota: se debe usar el comando break dentro de select si no correra por siempre, ejemplo:
+
+
+echo "Select a directory:
+select DIR in /bin /usr /etc
+do
+	#only continue if the user has selected something
+	if [ -n $DIR ]
+	then
+		DIR=$DIR
+		echo you have selecter $DIR
+		export DIR
+		break
+	else
+		echo invalid choice
+	fi
+done
+---------------------------------------------------------------------------------
+6.5) Using Trap
+
+se utiliza para interpretar una senal que se envia por medio de una combinacion de teclas del teclado.
+
+trap "" SIGNAL
+
+exmaple:
+
+trap "echo 'Forget it bro!'" INT			Este se ejecuanto cuando alguin aplica el Ctrl+C
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+
+Lesson 7		Script debbuging and analyzing
+
+escribe leible
+Incluye comentarios
+se compacto solo si es necesario
+
+No escribas para ti, si no para la persona que lo va a utilizar.
+
+Usa exit para identificar errores especificos.
+
+---------------------------------------------------------------------------------
+7.2) Analyzing tools
+
+7.2.1	Editores como notepad++ (bash syntax highlighting editors) 
+7.2.2	En vim usar ":set list" para mostrar caracteres ocultos
+7.2.3	inserte echo o read en puntos critos del script.
+7.2.4	use "bash -v" para activar el verbose output incluyendo mensajes de error.
+7.2.5	use "bash -n" para chequear por errores de sintaxis
+7.2.6	use "bash -x" para mostra en xtrace la informacion.
+
+---------------------------------------------------------------------------------
+7.3) Using bash -x
+
+lineas con + al inicio son lineas que se ejecutaron
+lineas sin el + son outputs.
+lineas con ++ es cuando se abre un subshell
+
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+
+Lesson 8		Scripting examples
+

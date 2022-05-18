@@ -1,0 +1,4 @@
+Ejercicios:
+
+Colectar los nombres de los jugadores.
+

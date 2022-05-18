@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+# Name          : 
+# Author        : carlos.gamboa@oracle.com
+# Version       : 1.0
+# Copyright     : GPLv2
+# Description   : This script is used to 
+# Usage         : ./
+#
+# Disclaimer           :
+#
+#Keep in mind that this is not part of an Oracle solution, hence its customization is not supported.
+#Oracle support is not responsible for maintaining, troubleshooting, nor supporting this script.
+#
+#If you consider this sample script suitable to be used as a solution but require customization, we rather recommend that you engage with Oracle ACS.
+#
+#Oracle Consulting Services, http://www.oracle.com/us/products/consulting/overview/index.html
+#
+############################################################
+
+
+
+
+
+
+
+
+
+
+
+#!/usr/bin/env bash
+
+# Name          : 
+# Author        : carlos.gamboa@oracle.com
+# Version       : 1.0
+# Copyright     : GPLv2
+# Description   : This script is used to 
+# Usage         : ./
+#
+# Disclaimer           :
+#
+#Keep in mind that this is not part of an Oracle solution, hence its customization is not supported.
+#Oracle support is not responsible for maintaining, troubleshooting, nor supporting this script.
+#
+#If you consider this sample script suitable to be used as a solution but require customization, we rather recommend that you engage with Oracle ACS.
+#
+#Oracle Consulting Services, http://www.oracle.com/us/products/consulting/overview/index.html
+#
+############################################################
